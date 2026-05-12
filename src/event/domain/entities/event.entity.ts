@@ -1,12 +1,7 @@
+import { randomUUID } from 'crypto';
 import { EventSchedule } from '../value-objects/event-schedule.value-object';
 import { EventCapacity } from '../value-objects/event-capacity.value-object';
-
-export enum EventStatus {
-  DRAFT = 'Draft',
-  PUBLISHED = 'Published',
-  CANCELLED = 'Cancelled',
-  COMPLETED = 'Completed'
-}
+import { EventStatus, EventStatusEnum } from '../value-objects/event-status.value-object';
 
 export class EventCreated {
   constructor(public readonly eventId: string) { }
@@ -50,8 +45,8 @@ export class Event {
   ): Event {
     const schedule = EventSchedule.create(startDate, endDate);
     const capacity = EventCapacity.create(maxCapValue);
-
-    const id = crypto.randomUUID();
+    const status = EventStatus.createDraft();
+    const id = randomUUID();
 
     const event = new Event(
       id,
@@ -60,7 +55,7 @@ export class Event {
       schedule,
       location,
       capacity,
-      EventStatus.DRAFT
+      status,
     );
 
     event.addDomainEvent(new EventCreated(id));
@@ -68,7 +63,6 @@ export class Event {
     return event;
   }
 
-  // Getters
   get id(): string { return this._id; }
   get schedule(): EventSchedule { return this._schedule; }
   get capacity(): number { return this._maximumCapacity.value; }
