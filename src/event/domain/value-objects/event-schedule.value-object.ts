@@ -23,7 +23,6 @@ export class EventSchedule {
         return this._endDate;
     }
 
-    // Value Object sering kali punya method untuk mengecek kesamaan nilai
     public equals(other: EventSchedule): boolean {
         if (other === null || other === undefined) {
             return false;

@@ -4,6 +4,7 @@ import { EventCapacity } from '../value-objects/event-capacity.value-object';
 import { EventStatus, EventStatusEnum } from '../value-objects/event-status.value-object';
 import { EventPublished } from '../events/event-published.domain-event';
 import { TicketCategory } from './ticket-category.entity';
+import { TicketCategoryCreated } from '../events/ticket-category-created.domain-event';
 
 export class EventCreated {
   constructor(public readonly eventId: string) { }
@@ -82,8 +83,34 @@ export class Event {
     this.addDomainEvent(new EventPublished(this.id));
   }
 
-  public addTicketCategory(category: TicketCategory): void {
-    this._ticketCategories.push(category);
+  public addTicketCategory(
+    name: string,
+    priceAmount: number,
+    priceCurrency: string,
+    quotaValue: number,
+    salesStartDate: Date,
+    salesEndDate: Date
+  ): void {
+
+    const currentTotalQuota = this._ticketCategories.reduce((sum, tc) => sum + tc.quota, 0);
+
+    if (currentTotalQuota + quotaValue > this.capacity) {
+      throw new Error('The total quota of all ticket categories must not exceed the maximum event capacity.'); // 
+    }
+
+    const newCategory = TicketCategory.create(
+      name,
+      priceAmount,
+      priceCurrency,
+      quotaValue,
+      salesStartDate,
+      salesEndDate,
+      this.schedule.startDate
+    );
+
+    this._ticketCategories.push(newCategory);
+
+    this.addDomainEvent(new TicketCategoryCreated(this.id, newCategory.id));
   }
 
 
