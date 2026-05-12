@@ -9,7 +9,7 @@ export class EventSchedule {
 
     public static create(startDate: Date, endDate: Date): EventSchedule {
         if (endDate < startDate) {
-            throw new Error('Tanggal selesai tidak boleh lebih awal dari tanggal mulai.');
+            throw new Error('The finish date cannot be earlier than the start date');
         }
 
         return new EventSchedule(startDate, endDate);
@@ -23,7 +23,6 @@ export class EventSchedule {
         return this._endDate;
     }
 
-    // Value Object sering kali punya method untuk mengecek kesamaan nilai
     public equals(other: EventSchedule): boolean {
         if (other === null || other === undefined) {
             return false;
