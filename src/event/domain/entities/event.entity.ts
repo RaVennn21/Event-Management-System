@@ -5,6 +5,7 @@ import { EventStatus, EventStatusEnum } from '../value-objects/event-status.valu
 import { EventPublished } from '../events/event-published.domain-event';
 import { TicketCategory } from './ticket-category.entity';
 import { TicketCategoryCreated } from '../events/ticket-category-created.domain-event';
+import { TicketCategoryDisabled } from '../events/ticket-category-disabled.domain-event';
 
 export class EventCreated {
   constructor(public readonly eventId: string) { }
@@ -112,7 +113,20 @@ export class Event {
 
     this.addDomainEvent(new TicketCategoryCreated(this.id, newCategory.id));
   }
+  public disableTicketCategory(categoryId: string): void {
+    if (this._status.value === EventStatusEnum.COMPLETED) {
+      throw new Error('Cannot disable a ticket category because the event is already completed.');
+    }
 
+    const category = this._ticketCategories.find(tc => tc.id === categoryId);
+    if (!category) {
+      throw new Error('Ticket category not found.');
+    }
+
+    category.disable();
+
+    this.addDomainEvent(new TicketCategoryDisabled(this.id, category.id));
+  }
 
   get id(): string { return this._id; }
   get schedule(): EventSchedule { return this._schedule; }

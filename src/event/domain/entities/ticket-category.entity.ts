@@ -48,6 +48,14 @@ export class TicketCategory {
         return new TicketCategory(id, name, price, quota, salesPeriod, true);
     }
 
+    public disable(): void {
+        if (!this._isActive) {
+            throw new Error('Ticket category is already disabled.');
+        }
+
+        this._isActive = false;
+    }
+
     get id(): string { return this._id; }
     get name(): string { return this._name; }
     get price(): Money { return this._price; }
