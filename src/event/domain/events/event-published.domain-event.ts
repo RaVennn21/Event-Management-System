@@ -1,0 +1,3 @@
+export class EventPublished {
+    constructor(public readonly eventId: string) { }
+}

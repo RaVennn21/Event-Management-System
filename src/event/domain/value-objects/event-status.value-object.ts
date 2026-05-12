@@ -15,19 +15,29 @@ export class EventStatus {
     public static createDraft(): EventStatus {
         return new EventStatus(EventStatusEnum.DRAFT);
     }
-
-    public transitionTo(newStatus: EventStatusEnum): EventStatus {
-        if (this._value === EventStatusEnum.CANCELLED && newStatus === EventStatusEnum.PUBLISHED) {
-            throw new Error('Event yang sudah dibatalkan tidak bisa dipublikasikan.');
+    public publish(): EventStatus {
+        if (this._value === EventStatusEnum.CANCELLED) {
+            throw new Error('A cancelled event cannot be published.');
         }
 
-        if (this._value === EventStatusEnum.COMPLETED && newStatus === EventStatusEnum.CANCELLED) {
-            throw new Error('Event yang sudah selesai tidak bisa dibatalkan.');
+        if (this._value !== EventStatusEnum.DRAFT) {
+            throw new Error('Only draft events can be published.');
         }
 
-        return new EventStatus(newStatus);
+        return new EventStatus(EventStatusEnum.PUBLISHED);
     }
 
+    public cancel(): EventStatus {
+        if (this._value === EventStatusEnum.COMPLETED) {
+            throw new Error('A completed event cannot be cancelled.');
+        }
+
+        if (this._value === EventStatusEnum.CANCELLED) {
+            throw new Error('The event is already cancelled.');
+        }
+
+        return new EventStatus(EventStatusEnum.CANCELLED);
+    }
     get value(): EventStatusEnum {
         return this._value;
     }

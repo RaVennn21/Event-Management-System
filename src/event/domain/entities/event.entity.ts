@@ -2,6 +2,8 @@ import { randomUUID } from 'crypto';
 import { EventSchedule } from '../value-objects/event-schedule.value-object';
 import { EventCapacity } from '../value-objects/event-capacity.value-object';
 import { EventStatus, EventStatusEnum } from '../value-objects/event-status.value-object';
+import { EventPublished } from '../events/event-published.domain-event';
+import { TicketCategory } from './ticket-category.entity';
 
 export class EventCreated {
   constructor(public readonly eventId: string) { }
@@ -15,6 +17,7 @@ export class Event {
   private _location: string;
   private _maximumCapacity: EventCapacity;
   private _status: EventStatus;
+  private _ticketCategories: TicketCategory[] = [];
   private _domainEvents: any[] = [];
 
   private constructor(
@@ -63,6 +66,27 @@ export class Event {
     return event;
   }
 
+  public publish(): void {
+    const activeCategories = this._ticketCategories.filter(tc => tc.isActive);
+    if (activeCategories.length === 0) {
+      throw new Error('Event tidak bisa dipublish karena tidak memiliki kategori tiket yang aktif.');
+    }
+
+    const totalQuota = this._ticketCategories.reduce((sum, tc) => sum + tc.quota, 0);
+    if (totalQuota > this._maximumCapacity.value) {
+      throw new Error('Total kuota kategori tiket melebihi kapasitas maksimum event.');
+    }
+
+    this._status = this._status.publish();
+
+    this.addDomainEvent(new EventPublished(this.id));
+  }
+
+  public addTicketCategory(category: TicketCategory): void {
+    this._ticketCategories.push(category);
+  }
+
+
   get id(): string { return this._id; }
   get schedule(): EventSchedule { return this._schedule; }
   get capacity(): number { return this._maximumCapacity.value; }
@@ -76,4 +100,5 @@ export class Event {
   public clearDomainEvents(): void {
     this._domainEvents = [];
   }
+
 }
