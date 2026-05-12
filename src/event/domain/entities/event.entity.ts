@@ -6,6 +6,7 @@ import { EventPublished } from '../events/event-published.domain-event';
 import { TicketCategory } from './ticket-category.entity';
 import { TicketCategoryCreated } from '../events/ticket-category-created.domain-event';
 import { TicketCategoryDisabled } from '../events/ticket-category-disabled.domain-event';
+import { EventCancelled } from '../events/event-cancelled.domain-event';
 
 export class EventCreated {
   constructor(public readonly eventId: string) { }
@@ -84,6 +85,18 @@ export class Event {
     this.addDomainEvent(new EventPublished(this.id));
   }
 
+  public cancel(): void {
+    this._status = this._status.cancel();
+
+    this._ticketCategories.forEach(category => {
+      if (category.isActive) {
+        category.disable();
+      }
+    });
+
+    this.addDomainEvent(new EventCancelled(this.id));
+  }
+
   public addTicketCategory(
     name: string,
     priceAmount: number,
@@ -113,6 +126,7 @@ export class Event {
 
     this.addDomainEvent(new TicketCategoryCreated(this.id, newCategory.id));
   }
+
   public disableTicketCategory(categoryId: string): void {
     if (this._status.value === EventStatusEnum.COMPLETED) {
       throw new Error('Cannot disable a ticket category because the event is already completed.');
