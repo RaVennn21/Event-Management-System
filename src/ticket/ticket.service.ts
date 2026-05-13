@@ -1,40 +1,38 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { TicketEntity } from './domain/entities/ticket.entity';
 import { TicketCode } from './domain/value-objects/ticket-code.value-object';
-import { TicketStatus } from './domain/value-objects/ticket-status.value-object'; // Import Enum baru
+// Import Class dan Enum (ValidStatuses)
+import { TicketStatus, ValidStatuses } from './domain/value-objects/ticket-status.value-object'; 
 
 @Injectable()
 export class TicketService {
-    // Nantinya di sini kita meng-inject ITicketRepository
-    constructor() { }
+  // Constructor untuk inject Repository nantinya
+  constructor() {}
 
-    async checkInTicket(rawTicketCode: string, eventId: string): Promise<void> {
-        try {
-            // 1. Validasi format kode tiket dengan Value Object
-            const ticketCode = TicketCode.create(rawTicketCode);
+  async checkInTicket(rawTicketCode: string, eventId: string): Promise<void> {
+    try {
+      // 1. Buat Value Object untuk kode tiket
+      const ticketCode = TicketCode.create(rawTicketCode);
 
-            // 2. Simulasi mengambil tiket dari database (Repository)
-            // Aslinya akan seperti ini: const ticket = await this.ticketRepo.findByCode(ticketCode);
+      // 2. Simulasi Entity rehydration (merakit ulang dari data database)
+      const ticket = TicketEntity.create({
+        ticketCode: ticketCode,
+        eventId: eventId,
+        bookingId: 'BKG-999888',
+        // --- PERUBAHAN UTAMA DI SINI ---
+        // Kita menggunakan factory method .create() dari Value Object
+        status: TicketStatus.create(ValidStatuses.ACTIVE), 
+      });
 
-            // Karena masih simulasi, kita buat entitas dummy dengan struktur YANG BARU
-            const ticket = TicketEntity.create({
-                ticketCode: ticketCode,
-                eventId: eventId,
-                bookingId: 'BKG-999888', // <-- WAJIB ADA: Tambahan primitif referensi booking
-                status: TicketStatus.ACTIVE, // <-- Menggunakan Enum
-            });
+      // 3. Eksekusi Domain Behavior
+      ticket.checkIn(eventId);
 
-            // 3. Eksekusi Domain Behavior
-            // Validasi bisnis (apakah status Active, eventId cocok, dll) akan berjalan di sini
-            ticket.checkIn(eventId);
-
-            // 4. Simpan kembali state yang sudah berubah ke database
-            // Aslinya: await this.ticketRepo.save(ticket);
-
-        } catch (error: any) {
-            // Jika terjadi pelanggaran business rules (Domain Error), 
-            // kita tangkap dan ubah menjadi HTTP 400 Bad Request
-            throw new BadRequestException(error.message);
-        }
+      // 4. Save ke database (simulasi)
+      // await this.ticketRepo.save(ticket);
+      
+    } catch (error: any) {
+      // Tangkap error validasi dari Value Object atau Entity dan ubah jadi Bad Request
+      throw new BadRequestException(error.message);
     }
+  }
 }
