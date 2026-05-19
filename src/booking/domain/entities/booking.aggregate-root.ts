@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 import { BookingStatus } from '../value-objects/booking-status.value-object';
 import { TicketReserved } from '../events/ticket-reserved.domain-event';
+import { Money } from '../../../event/domain/value-objects/money.value-object';
 
 export class Booking {
   private _id: string;
@@ -11,6 +12,7 @@ export class Booking {
   private _status: BookingStatus;
   private _createdAt: Date;
   private _paymentDeadline: Date;
+  private _totalPrice: Money;
   private _domainEvents: any[] = [];
 
   private constructor(
@@ -21,7 +23,8 @@ export class Booking {
     quantity: number,
     status: BookingStatus,
     createdAt: Date,
-    paymentDeadline: Date
+    paymentDeadline: Date,
+    totalPrice: Money
   ) {
     this._id = id;
     this._eventId = eventId;
@@ -31,6 +34,7 @@ export class Booking {
     this._status = status;
     this._createdAt = createdAt;
     this._paymentDeadline = paymentDeadline;
+    this._totalPrice = totalPrice;
   }
 
   public static create(
@@ -38,11 +42,16 @@ export class Booking {
     ticketCategoryId: string,
     customerId: string,
     quantity: number,
-    paymentDeadline: Date
+    paymentDeadline: Date,
+    unitPrice: Money,
+    serviceFee?: Money
   ): Booking {
     const id = randomUUID();
     const status = BookingStatus.createPendingPayment();
     const createdAt = new Date();
+
+    const totalAmount = (unitPrice.amount * quantity) + (serviceFee ? serviceFee.amount : 0);
+    const totalPrice = Money.create(totalAmount, unitPrice.currency);
 
     const booking = new Booking(
       id,
@@ -52,7 +61,8 @@ export class Booking {
       quantity,
       status,
       createdAt,
-      paymentDeadline
+      paymentDeadline,
+      totalPrice
     );
 
     booking.addDomainEvent(
@@ -77,6 +87,7 @@ export class Booking {
   get status(): BookingStatus { return this._status; }
   get createdAt(): Date { return this._createdAt; }
   get paymentDeadline(): Date { return this._paymentDeadline; }
+  get totalPrice(): Money { return this._totalPrice; }
   get domainEvents(): any[] { return [...this._domainEvents]; }
 
   private addDomainEvent(domainEvent: any): void {

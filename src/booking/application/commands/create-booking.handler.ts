@@ -62,7 +62,8 @@ export class CreateBookingCommandHandler implements ICommandHandler<CreateBookin
       command.ticketCategoryId,
       command.customerId,
       command.quantity,
-      paymentDeadline
+      paymentDeadline,
+      category.price
     );
 
     await this.bookingRepository.save(booking);
