@@ -1,7 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 import { ExpireBookingCommand } from './expire-booking.command';
-import { IBookingRepository, I_BOOKING_REPOSITORY } from '../interfaces/booking.repository.interface';
+import { I_BOOKING_REPOSITORY } from '../interfaces/booking.repository.interface';
+import type { IBookingRepository } from '../interfaces/booking.repository.interface';
 
 @CommandHandler(ExpireBookingCommand)
 export class ExpireBookingCommandHandler implements ICommandHandler<ExpireBookingCommand, void> {

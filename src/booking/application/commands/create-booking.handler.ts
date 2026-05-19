@@ -2,8 +2,10 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 import { CreateBookingCommand } from './create-booking.command';
 import { Booking } from '../../domain/entities/booking.aggregate-root';
-import { IBookingRepository, I_BOOKING_REPOSITORY } from '../interfaces/booking.repository.interface';
-import { IEventRepository, I_EVENT_REPOSITORY } from '../../../event/domain/repositories/event.repository.interface';
+import { I_BOOKING_REPOSITORY } from '../interfaces/booking.repository.interface';
+import type { IBookingRepository } from '../interfaces/booking.repository.interface';
+import { I_EVENT_REPOSITORY } from '../../../event/domain/repositories/event.repository.interface';
+import type { IEventRepository } from '../../../event/domain/repositories/event.repository.interface';
 import { EventStatusEnum } from '../../../event/domain/value-objects/event-status.value-object';
 
 @CommandHandler(CreateBookingCommand)

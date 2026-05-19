@@ -1,7 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 import { PayBookingCommand } from './pay-booking.command';
-import { IBookingRepository, I_BOOKING_REPOSITORY } from '../interfaces/booking.repository.interface';
+import { I_BOOKING_REPOSITORY } from '../interfaces/booking.repository.interface';
+import type { IBookingRepository } from '../interfaces/booking.repository.interface';
 import { Money } from '../../../event/domain/value-objects/money.value-object';
 
 @CommandHandler(PayBookingCommand)
