@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto';
 import { BookingStatus, BookingStatusEnum } from '../value-objects/booking-status.value-object';
 import { TicketReserved } from '../events/ticket-reserved.domain-event';
 import { BookingPaid } from '../events/booking-paid.domain-event';
+import { BookingExpired } from '../events/booking-expired.domain-event';
 import { Ticket } from './ticket.entity';
 import { Money } from '../../../event/domain/value-objects/money.value-object';
 
@@ -114,6 +115,27 @@ export class Booking {
     }
 
     this.addDomainEvent(new BookingPaid(this.id));
+  }
+
+  public expire(currentTime: Date): void {
+    if (this._status.value !== BookingStatusEnum.PENDING_PAYMENT) {
+      throw new Error('A booking with the status Paid or Cancelled cannot be marked as expired.');
+    }
+
+    if (currentTime <= this._paymentDeadline) {
+      throw new Error('A booking cannot be expired before its payment deadline has passed.');
+    }
+
+    this._status = BookingStatus.createExpired();
+
+    this.addDomainEvent(
+      new BookingExpired(
+        this.id,
+        this.eventId,
+        this.ticketCategoryId,
+        this.quantity
+      )
+    );
   }
 
   private addDomainEvent(domainEvent: any): void {

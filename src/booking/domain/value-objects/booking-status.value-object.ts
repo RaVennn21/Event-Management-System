@@ -2,6 +2,7 @@ export enum BookingStatusEnum {
   PENDING_PAYMENT = 'PendingPayment',
   PAID = 'Paid',
   CANCELLED = 'Cancelled',
+  EXPIRED = 'Expired',
 }
 
 export class BookingStatus {
@@ -17,5 +18,9 @@ export class BookingStatus {
 
   public static createCancelled(): BookingStatus {
     return new BookingStatus(BookingStatusEnum.CANCELLED);
+  }
+
+  public static createExpired(): BookingStatus {
+    return new BookingStatus(BookingStatusEnum.EXPIRED);
   }
 }
