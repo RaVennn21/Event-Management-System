@@ -61,5 +61,6 @@ export class TicketCategory {
     get price(): Money { return this._price; }
     get quota(): number { return this._quota.value; }
     get isActive(): boolean { return this._isActive; }
+    get salesStartDate(): Date { return this._salesPeriod.startDate; }
     get salesEndDate(): Date { return this._salesPeriod.endDate; }
 }

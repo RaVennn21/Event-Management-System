@@ -146,6 +146,7 @@ export class Event {
   get schedule(): EventSchedule { return this._schedule; }
   get capacity(): number { return this._maximumCapacity.value; }
   get status(): EventStatus { return this._status; }
+  get ticketCategories(): TicketCategory[] { return [...this._ticketCategories]; }
   get domainEvents(): any[] { return [...this._domainEvents]; }
 
   private addDomainEvent(domainEvent: any): void {
