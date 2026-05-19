@@ -1,6 +1,8 @@
 import { randomUUID } from 'crypto';
-import { BookingStatus } from '../value-objects/booking-status.value-object';
+import { BookingStatus, BookingStatusEnum } from '../value-objects/booking-status.value-object';
 import { TicketReserved } from '../events/ticket-reserved.domain-event';
+import { BookingPaid } from '../events/booking-paid.domain-event';
+import { Ticket } from './ticket.entity';
 import { Money } from '../../../event/domain/value-objects/money.value-object';
 
 export class Booking {
@@ -13,6 +15,7 @@ export class Booking {
   private _createdAt: Date;
   private _paymentDeadline: Date;
   private _totalPrice: Money;
+  private _tickets: Ticket[] = [];
   private _domainEvents: any[] = [];
 
   private constructor(
@@ -88,7 +91,30 @@ export class Booking {
   get createdAt(): Date { return this._createdAt; }
   get paymentDeadline(): Date { return this._paymentDeadline; }
   get totalPrice(): Money { return this._totalPrice; }
+  get tickets(): Ticket[] { return [...this._tickets]; }
   get domainEvents(): any[] { return [...this._domainEvents]; }
+
+  public pay(paymentAmount: Money, currentTime: Date): void {
+    if (this._status.value !== BookingStatusEnum.PENDING_PAYMENT) {
+      throw new Error('A booking can only be paid if its status is Pending Payment.');
+    }
+
+    if (currentTime > this._paymentDeadline) {
+      throw new Error('A booking cannot be paid if the payment deadline has passed.');
+    }
+
+    if (!this._totalPrice.equals(paymentAmount)) {
+      throw new Error('The payment amount must be equal to the total booking price.');
+    }
+
+    this._status = BookingStatus.createPaid();
+
+    for (let i = 0; i < this._quantity; i++) {
+      this._tickets.push(Ticket.issue());
+    }
+
+    this.addDomainEvent(new BookingPaid(this.id));
+  }
 
   private addDomainEvent(domainEvent: any): void {
     this._domainEvents.push(domainEvent);
