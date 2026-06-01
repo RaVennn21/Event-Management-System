@@ -69,6 +69,35 @@ export class Event {
     return event;
   }
 
+  public static reconstitute(
+    id: string,
+    name: string,
+    description: string,
+    startDate: Date,
+    endDate: Date,
+    location: string,
+    maximumCapacity: number,
+    statusValue: string,
+    ticketCategories: TicketCategory[]
+  ): Event {
+    const schedule = EventSchedule.create(startDate, endDate);
+    const capacity = EventCapacity.create(maximumCapacity);
+    const status = EventStatus.reconstitute(statusValue);
+    
+    const event = new Event(
+      id,
+      name,
+      description,
+      schedule,
+      location,
+      capacity,
+      status
+    );
+    
+    event._ticketCategories = ticketCategories;
+    return event;
+  }
+
   public publish(): void {
     const activeCategories = this._ticketCategories.filter(tc => tc.isActive);
     if (activeCategories.length === 0) {

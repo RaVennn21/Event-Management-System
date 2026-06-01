@@ -45,4 +45,8 @@ export class EventStatus {
     public equals(other: EventStatus): boolean {
         return other !== null && this._value === other.value;
     }
+
+    public static reconstitute(value: string): EventStatus {
+        return new EventStatus(value as EventStatusEnum);
+    }
 }

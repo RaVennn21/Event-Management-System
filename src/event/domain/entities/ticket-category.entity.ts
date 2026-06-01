@@ -48,6 +48,22 @@ export class TicketCategory {
         return new TicketCategory(id, name, price, quota, salesPeriod, true);
     }
 
+    public static reconstitute(
+        id: string,
+        name: string,
+        priceAmount: number,
+        priceCurrency: string,
+        quotaValue: number,
+        salesStartDate: Date,
+        salesEndDate: Date,
+        isActive: boolean
+    ): TicketCategory {
+        const price = Money.create(priceAmount, priceCurrency);
+        const quota = TicketQuota.create(quotaValue);
+        const salesPeriod = SalesPeriod.create(salesStartDate, salesEndDate);
+        return new TicketCategory(id, name, price, quota, salesPeriod, isActive);
+    }
+
     public disable(): void {
         if (!this._isActive) {
             throw new Error('Ticket category is already disabled.');
