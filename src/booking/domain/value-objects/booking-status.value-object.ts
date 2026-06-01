@@ -23,4 +23,8 @@ export class BookingStatus {
   public static createExpired(): BookingStatus {
     return new BookingStatus(BookingStatusEnum.EXPIRED);
   }
+
+  public static reconstitute(value: string): BookingStatus {
+    return new BookingStatus(value as BookingStatusEnum);
+  }
 }

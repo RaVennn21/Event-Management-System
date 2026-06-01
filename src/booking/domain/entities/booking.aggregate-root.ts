@@ -83,6 +83,37 @@ export class Booking {
     return booking;
   }
 
+  public static reconstitute(
+    id: string,
+    eventId: string,
+    ticketCategoryId: string,
+    customerId: string,
+    quantity: number,
+    statusValue: string,
+    createdAt: Date,
+    paymentDeadline: Date,
+    totalPriceAmount: number,
+    totalPriceCurrency: string,
+    tickets: Ticket[]
+  ): Booking {
+    const status = BookingStatus.reconstitute(statusValue);
+    const totalPrice = Money.create(totalPriceAmount, totalPriceCurrency);
+    
+    const booking = new Booking(
+      id,
+      eventId,
+      ticketCategoryId,
+      customerId,
+      quantity,
+      status,
+      createdAt,
+      paymentDeadline,
+      totalPrice
+    );
+    booking._tickets = tickets;
+    return booking;
+  }
+
   get id(): string { return this._id; }
   get eventId(): string { return this._eventId; }
   get ticketCategoryId(): string { return this._ticketCategoryId; }

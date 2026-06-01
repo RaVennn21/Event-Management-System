@@ -15,6 +15,10 @@ export class Ticket {
     return new Ticket(id, code);
   }
 
+  public static reconstitute(id: string, code: string): Ticket {
+    return new Ticket(id, code);
+  }
+
   get id(): string { return this._id; }
   get code(): string { return this._code; }
 }
