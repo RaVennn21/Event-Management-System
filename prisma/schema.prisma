@@ -3,11 +3,73 @@
 
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
+datasource db {
+  provider = "postgresql"
+}
+
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
 }
 
-datasource db {
-  provider = "postgresql"
+model Event {
+  id               String           @id @default(uuid())
+  name             String
+  description      String
+  startDate        DateTime
+  endDate          DateTime
+  location         String
+  maximumCapacity  Int
+  status           String           // Maps to EventStatus ('Draft', 'Published', etc.)
+  ticketCategories TicketCategory[]
+  bookings         Booking[]
 }
+
+model TicketCategory {
+  id             String    @id @default(uuid())
+  eventId        String
+  event          Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name           String
+  priceAmount    Float
+  priceCurrency  String
+  quota          Int
+  salesStartDate DateTime
+  salesEndDate   DateTime
+  isActive       Boolean   @default(true)
+  bookings       Booking[]
+}
+
+model Booking {
+  id                 String         @id @default(uuid())
+  eventId            String
+  event              Event          @relation(fields: [eventId], references: [id])
+  ticketCategoryId   String
+  ticketCategory     TicketCategory @relation(fields: [ticketCategoryId], references: [id])
+  customerId         String
+  quantity           Int
+  totalPriceAmount   Float
+  totalPriceCurrency String
+  status             String         // Maps to BookingStatus ('PendingPayment', 'Paid', etc.)
+  createdAt          DateTime       @default(now())
+  paymentDeadline    DateTime
+  tickets            Ticket[]
+  refund             Refund?
+}
+
+model Ticket {
+  id         String   @id @default(uuid())
+  bookingId  String
+  booking    Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  ticketCode String   @unique
+  status     String   // "Active", "CheckedIn", "Cancelled"
+}
+
+model Refund {
+  id               String   @id @default(uuid())
+  bookingId        String   @unique
+  booking          Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  status           String   // "Requested", "Approved", "Rejected", "PaidOut"
+  rejectionReason  String?
+  paymentReference String?
+}
+
